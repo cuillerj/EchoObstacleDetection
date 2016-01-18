@@ -76,9 +76,9 @@ EchoObstacleDetection::EchoObstacleDetection(uint8_t pinEcho1 ,uint8_t pinTrigge
     lastEchoMicro[3] = micros() - prevEchoMicro[3];
   }
 }
-ISR(TIMER5_OVF_vect)        // timer interrupt used to regurarly trigger echos
+ISR(TIMER4_OVF_vect)        // timer interrupt used to regurarly trigger echos
 {
-  TCNT5 = tcnt;            // preload timer to adjust duration
+  TCNT4 = tcnt;            // preload timer to adjust duration
 	for (uint8_t idx=0;idx<4;idx++)
 	{
 		if (echoArray[idx]!=0)
@@ -161,11 +161,11 @@ ISR(TIMER5_OVF_vect)        // timer interrupt used to regurarly trigger echos
 		}
 	}
 	noInterrupts(); // disable all interrupts
-	TCCR5A = 0;  // set entire TCCR5A register to 0
-	TCCR5B = 0;  // set entire TCCR5B register to 0
-	TCNT5 = tcnt; // preload timer 65536-16MHz/256/2Hz
-	TCCR5B |= ((1 << CS12) | (1 << CS10)); // 1024 prescaler
-	TIMSK5 |= (1 << TOIE5); // enable timer overflow interrupt
+	TCCR4A = 0;  // set entire TCCR5A register to 0
+	TCCR4B = 0;  // set entire TCCR5B register to 0
+	TCNT4 = tcnt; // preload timer 65536-16MHz/256/2Hz
+	TCCR4B |= ((1 << CS12) | (1 << CS10)); // 1024 prescaler
+	TIMSK4 |= (1 << TOIE4); // enable timer overflow interrupt
 	interrupts(); // enable all interrupts
 }
    void EchoObstacleDetection::StopDetection(boolean echo1, boolean echo2, boolean echo3, boolean echo4)
