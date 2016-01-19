@@ -6,7 +6,7 @@ uint8_t triggerArray[4];    // store 1 to 4 trigger pin values
 boolean alertArray[4];      // alert flags 
 uint8_t _pinInterrupt;      // pin used tio interrupt main program
 uint8_t lastAlertEchoNumber; // keep last echNumber that was in distance alert    
-unsigned int tcnt = 49911;   // 49911 default for 1s cycle
+unsigned int tcnt ;   // used to init timer overflow for instance 49911 for 1s cycle 
 unsigned long distArray[4];  // keep last echo distances for each echo pin
 volatile boolean triggerArrayStatus[4];   // 4 switchs that indicate if echo has been triggered on not
 volatile unsigned long prevEchoMicro[4];  // 4 timers used to calculate distances
@@ -47,6 +47,7 @@ EchoObstacleDetection::EchoObstacleDetection(uint8_t pinEcho1 ,uint8_t pinTrigge
   if (digitalRead(echoArray[1]) == 1)
   {
     prevEchoMicro[1] = micros();
+	CheckAlert(1);
   }
   else
   {
@@ -59,6 +60,7 @@ EchoObstacleDetection::EchoObstacleDetection(uint8_t pinEcho1 ,uint8_t pinTrigge
   if (digitalRead(echoArray[2]) == 1)
   {
     prevEchoMicro[2] = micros();
+	CheckAlert(2);
   }
   else
   {
@@ -70,6 +72,7 @@ EchoObstacleDetection::EchoObstacleDetection(uint8_t pinEcho1 ,uint8_t pinTrigge
   if (digitalRead(echoArray[3]) == 1)
   {
     prevEchoMicro[3] = micros();
+	CheckAlert(3);
   }
   else
   {
@@ -107,7 +110,7 @@ ISR(TIMER4_OVF_vect)        // timer interrupt used to regurarly trigger echos
 		cycleDuration = maxTimerCycle;
 	}
 		
-	tcnt=65536-timerFrequency*cycleDuration;
+	tcnt=65536-timerFrequency*cycleDuration;  // tcnt intialised to such a value that timer overflow will appear after the cycle duration
 
 		
 	if (echo1)
@@ -115,7 +118,6 @@ ISR(TIMER4_OVF_vect)        // timer interrupt used to regurarly trigger echos
 		echoArray[0]=_pinEcho1;
 		triggerArray[0]=_pinTrigger1;
 		triggerArrayStatus[0]=false;
-//		CheckAlert(0);
 	}
 	if (echo2)
 	{
@@ -137,7 +139,6 @@ ISR(TIMER4_OVF_vect)        // timer interrupt used to regurarly trigger echos
 	}
 	for (uint8_t idx=0;idx<4;idx++)
 	{
-		Serial.println(echoArray[idx]);
 		if (echoArray[idx]!=0)
 		{
 			pinMode(echoArray[idx], INPUT);
@@ -161,9 +162,9 @@ ISR(TIMER4_OVF_vect)        // timer interrupt used to regurarly trigger echos
 		}
 	}
 	noInterrupts(); // disable all interrupts
-	TCCR4A = 0;  // set entire TCCR5A register to 0
-	TCCR4B = 0;  // set entire TCCR5B register to 0
-	TCNT4 = tcnt; // preload timer 65536-16MHz/256/2Hz
+	TCCR4A = 0;  // set entire TCCR4A register to 0
+	TCCR4B = 0;  // set entire TCCR4B register to 0
+	TCNT4 = tcnt; // 
 	TCCR4B |= ((1 << CS12) | (1 << CS10)); // 1024 prescaler
 	TIMSK4 |= (1 << TOIE4); // enable timer overflow interrupt
 	interrupts(); // enable all interrupts
@@ -209,6 +210,10 @@ ISR(TIMER4_OVF_vect)        // timer interrupt used to regurarly trigger echos
 }
    void EchoObstacleDetection::SetAlertOn(boolean echo1,unsigned int dist1,boolean echo2,unsigned int dist2,boolean echo3,unsigned int dist3,boolean echo4,unsigned int dist4)
  {
+	 if (_pinInterrupt!=0)
+	 {
+		pinMode(_pinInterrupt,OUTPUT);
+	 }
 	if (echo1)
 	{
 		alertArray[0]=true;
@@ -217,19 +222,19 @@ ISR(TIMER4_OVF_vect)        // timer interrupt used to regurarly trigger echos
 		if (echo2)
 	{
 		alertArray[1]=true;
-		distArray[1]=dist1;
+		distArray[1]=dist2;
 	}
 	
 		if (echo3)
 	{
 		alertArray[2]=true;
-		distArray[2]=dist1;
+		distArray[2]=dist3;
 	}
 
 		if (echo4)
 	{
 		alertArray[3]=true;	
-		distArray[3]=dist1;
+		distArray[3]=dist4;
 	}
 }
    void EchoObstacleDetection::SetAlertOff(boolean echo1,boolean echo2,boolean echo3,boolean echo4)
@@ -280,7 +285,7 @@ void CheckAlert(uint8_t echoNumber)
 		if (_pinInterrupt!=0)
 		{
 			lastAlertEchoNumber=echoNumber;
-			pinMode(_pinInterrupt,OUTPUT);		
+//			pinMode(_pinInterrupt,OUTPUT);		
 			digitalWrite(_pinInterrupt,1);
 		}
 		digitalWrite(_pinInterrupt,1);
@@ -289,4 +294,8 @@ void CheckAlert(uint8_t echoNumber)
 uint8_t EchoObstacleDetection::GetAlertEchoNumber()
 {
 	return lastAlertEchoNumber;
+}
+unsigned int EchoObstacleDetection::GetEchoThreshold(uint8_t echoNumber)
+{
+	return distArray[echoNumber];
 }

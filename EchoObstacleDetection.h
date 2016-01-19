@@ -12,6 +12,7 @@ SetAlertOn is used to activate interruption (the main code must attach this inte
 	4 x couples (true, threshold) must be defined - (false,0) meaning not used
 GetAlertEchoNumber provide which is the last echo system that was under threshold
 GetDistance provide last distance mesurment for the specified HCSR
+GetEchoThreshold provide threshold distance for the specified HCSR under which an interrupt will be set on
 SetAlertOff switch off alert for HSCR that are no longer in true state
 StopDetection stop detection for HSCR that are no longer in true state
 
@@ -33,9 +34,10 @@ void StopDetection(boolean echo1,boolean echo2,boolean echo3,boolean echo4);
 void SetAlertOn(boolean echo1,unsigned int dist1,boolean echo2,unsigned int dist2,boolean echo3,unsigned int dist3,boolean echo4,unsigned int dist4);
 void SetAlertOff(boolean echo1,boolean echo2,boolean echo3,boolean echo4);
 unsigned int GetDistance(uint8_t  echoNumber);
+unsigned int GetEchoThreshold(uint8_t  echoNumber);
 uint8_t GetAlertEchoNumber();
 
-uint8_t _pinEcho1;
+uint8_t _pinEcho1;         //
 uint8_t _pinTrigger1;
 uint8_t _pinEcho2;
 uint8_t _pinTrigger2;
