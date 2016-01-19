@@ -6,3 +6,4 @@ It provides distance measurements and can also monitor that distances are under 
 It can manage from 1 to 4 echos components. It has been designed and tested with HC SR04 module. It must work as well with HC SR03.
 Usage limitation: when using more than 1 HCSR modules, their location must be such that the echos will not interfer.
 
+This software is free.
