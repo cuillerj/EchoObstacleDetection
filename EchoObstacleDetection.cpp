@@ -6,7 +6,7 @@ uint8_t triggerArray[4];    // store 1 to 4 trigger pin values
 boolean alertArray[4];      // alert flags 
 uint8_t _pinInterrupt;      // pin used tio interrupt main program
 uint8_t lastAlertEchoNumber; // keep last echNumber that was in distance alert    
-unsigned int tcnt ;   // used to init timer overflow for instance 49911 for 1s cycle 
+unsigned int tcntEcho ;   // used to init timer overflow for instance 49911 for 1s cycle 
 unsigned long distArray[4];  // keep last echo distances for each echo pin
 volatile boolean triggerArrayStatus[4];   // 4 switchs that indicate if echo has been triggered on not
 volatile unsigned long prevEchoMicro[4];  // 4 timers used to calculate distances
@@ -81,7 +81,7 @@ EchoObstacleDetection::EchoObstacleDetection(uint8_t pinEcho1 ,uint8_t pinTrigge
 }
 ISR(TIMER4_OVF_vect)        // timer interrupt used to regurarly trigger echos
 {
-  TCNT4 = tcnt;            // preload timer to adjust duration
+  TCNT4 = tcntEcho;            // preload timer to adjust duration
 	for (uint8_t idx=0;idx<4;idx++)
 	{
 		if (echoArray[idx]!=0)
@@ -110,7 +110,7 @@ ISR(TIMER4_OVF_vect)        // timer interrupt used to regurarly trigger echos
 		cycleDuration = maxTimerCycle;
 	}
 		
-	tcnt=65536-timerFrequency*cycleDuration;  // tcnt intialised to such a value that timer overflow will appear after the cycle duration
+	tcntEcho=65536-timerFrequency*cycleDuration;  // tcntEcho intialised to such a value that timer overflow will appear after the cycle duration
 
 		
 	if (echo1)
@@ -164,14 +164,14 @@ ISR(TIMER4_OVF_vect)        // timer interrupt used to regurarly trigger echos
 	noInterrupts(); // disable all interrupts
 	TCCR4A = 0;  // set entire TCCR4A register to 0
 	TCCR4B = 0;  // set entire TCCR4B register to 0
-	TCNT4 = tcnt; // 
+	TCNT4 = tcntEcho; // 
 	TCCR4B |= ((1 << CS12) | (1 << CS10)); // 1024 prescaler
 	TIMSK4 |= (1 << TOIE4); // enable timer overflow interrupt
 	interrupts(); // enable all interrupts
 }
    void EchoObstacleDetection::StopDetection(boolean echo1, boolean echo2, boolean echo3, boolean echo4)
 {
-		if (!echo1)
+		if (echo1)
 	{
 		echoArray[0]=0x00;
 		triggerArray[0]=0x00;
@@ -180,7 +180,7 @@ ISR(TIMER4_OVF_vect)        // timer interrupt used to regurarly trigger echos
 		lastEchoMicro[0]=0;
 		alertArray[0]=false;
 	}
-		if (!echo2)
+		if (echo2)
 	{
 		echoArray[1]=0x00;
 		triggerArray[1]=0x00;
@@ -189,7 +189,7 @@ ISR(TIMER4_OVF_vect)        // timer interrupt used to regurarly trigger echos
 		lastEchoMicro[1]=0;
 		alertArray[1]=false;
 	}
-		if (!echo3)
+		if (echo3)
 	{
 		echoArray[2]=0x00;
 		triggerArray[2]=0x00;
@@ -198,7 +198,7 @@ ISR(TIMER4_OVF_vect)        // timer interrupt used to regurarly trigger echos
 		lastEchoMicro[2]=0;
 		alertArray[2]=false;
 	}
-		if (!echo4)
+		if (echo4)
 	{
 		echoArray[3]=0x00;
 		triggerArray[3]=0x00;

@@ -3,7 +3,7 @@
 #define pinTrigger0 22
 #define pinEcho1 21
 #define pinTrigger1 23
-#define pinInterrupt 3
+#define pinInterrupt 18  // with pull down 10k resistor
 #define echoCycleDuration 0.5
 #define echo2 false  // does not exit
 #define echo2Alert false  // does not exit
@@ -12,7 +12,7 @@
 boolean echo0 = true;
 boolean echo0Alert = true; // does not exit
 boolean echo1 = true;
-boolean echo1Alert = false; // does not exit
+boolean echo1Alert = true; // does not exit
 EchoObstacleDetection echo(pinEcho0, pinTrigger0, pinEcho1, pinTrigger1, 0, 0, 0, 0, pinInterrupt);
 boolean boot = true;
 int i = 0;
@@ -45,14 +45,12 @@ void loop() {
   }
   if (i == 5)
   {
-    echo1 = false;
-    echo.StopDetection(echo0, echo1, echo2, echo3);
-    echo.SetAlertOn(echo0Alert, 20, echo1Alert, 0, echo2Alert, 0, echo3Alert, 0);
+    echo.SetAlertOn(echo0Alert, 20, echo1Alert, 15, echo2Alert, 0, echo3Alert, 0);
   }
-  if (i == 20)
+  if (i == 100)
   {
-    echo0Alert=false;
-    echo.SetAlertOff(echo0Alert, echo0Alert, echo0Alert, echo0Alert);
+
+  echo.SetAlertOff(echo0Alert, false, echo0Alert, echo0Alert);
   }
 
   i++;
