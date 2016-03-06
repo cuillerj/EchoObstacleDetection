@@ -207,6 +207,26 @@ ISR(TIMER4_OVF_vect)        // timer interrupt used to regurarly trigger echos
 		lastEchoMicro[3]=0;
 		alertArray[3]=false;
 	}
+		uint8_t countInt=0;
+		for (int i=0;i<4;i++)
+			{
+				if (triggerArrayStatus[i]==true)
+					{
+						countInt++;
+					}
+			}
+		if (countInt==0)  // stop timer
+			{
+			noInterrupts(); // disable all interrupts
+			TCCR4A = 0;  // set entire TCCR5A register to 0
+			TCCR4B = 0;  // set entire TCCR5B register to 0
+			TCNT4 = 0; // 
+			TCCR4B |= ((0 << CS10) ); // 
+			TCCR4B |= ((0 << CS11) ); //
+			TCCR4B |= ((0 << CS12) ); // 256 prescaler
+			TIMSK4 |= (0 << TOIE4); // enable timer overflow interrupt
+			interrupts(); // enable all interrupts
+			}
 }
    void EchoObstacleDetection::SetAlertOn(boolean echo1,unsigned int dist1,boolean echo2,unsigned int dist2,boolean echo3,unsigned int dist3,boolean echo4,unsigned int dist4)
  {
