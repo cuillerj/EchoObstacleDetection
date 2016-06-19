@@ -232,7 +232,7 @@ ISR(TIMER4_OVF_vect)        // timer interrupt used to regurarly trigger echos
  {
 	 if (_pinInterrupt!=0)
 	 {
-		pinMode(_pinInterrupt,OUTPUT);
+//		pinMode(_pinInterrupt,OUTPUT);
 	 }
 	if (echo1)
 	{
@@ -305,10 +305,12 @@ void CheckAlert(uint8_t echoNumber)
 		if (_pinInterrupt!=0)
 		{
 			lastAlertEchoNumber=echoNumber;
-//			pinMode(_pinInterrupt,OUTPUT);		
+			pinMode(_pinInterrupt,OUTPUT);		
 			digitalWrite(_pinInterrupt,1);
+			delay(1);
+			digitalWrite(_pinInterrupt,0);
 		}
-		digitalWrite(_pinInterrupt,1);
+//		digitalWrite(_pinInterrupt,1);
 	}
 }
 uint8_t EchoObstacleDetection::GetAlertEchoNumber()
