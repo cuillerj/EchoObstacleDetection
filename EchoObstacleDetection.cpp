@@ -210,11 +210,14 @@ ISR(TIMER4_OVF_vect)
 			attachInterrupt(digitalPinToInterrupt(echoArray[3]), Echo4Interrupt, CHANGE);
 		}
 	}
+	/*
+	set timer 4 interrupt parameters
+	*/
 	noInterrupts(); // disable all interrupts
 	TCCR4A = 0;  // set entire TCCR4A register to 0
 	TCCR4B = 0;  // set entire TCCR4B register to 0
-	TCNT4 = tcntEcho; // 
-	TCCR4B |= ((1 << CS12) | (1 << CS10)); // 1024 prescaler
+	TCNT4 = tcntEcho; // set threshold according to the expected cycle
+	TCCR4B |= ((1 << CS12) | (1 << CS10)); // 1024 prescaler - frequency=16,000,000Hz/1024 <-> timerFrequency 15625
 	TIMSK4 |= (1 << TOIE4); // enable timer overflow interrupt
 	interrupts(); // enable all interrupts
 }
@@ -295,15 +298,7 @@ void EchoObstacleDetection::SetMonitorOn(boolean echo1,unsigned int dist1,uint8_
 			attachInterrupt(digitalPinToInterrupt(echoArray[3]), Echo4Interrupt, CHANGE);
 		}
 	}
-	/*
-	noInterrupts(); // disable all interrupts
-	TCCR4A = 0;  // set entire TCCR4A register to 0
-	TCCR4B = 0;  // set entire TCCR4B register to 0
-	TCNT4 = tcntEcho; // 
-	TCCR4B |= ((1 << CS12) | (1 << CS10)); // 1024 prescaler
-	TIMSK4 |= (1 << TOIE4); // enable timer overflow interrupt
-	interrupts(); // enable all interrupts	
-	*/
+
  }
     void EchoObstacleDetection::SetMonitorOff()
 	{
@@ -439,17 +434,6 @@ void CheckAlert(uint8_t echoNumber)
 		if (lastEchoMicro[echoNumber]/echoCm <= distArray[echoNumber]) // modified 09082017 to allow monitoring distance becoming 0
 		{
 			SetInterruptPIN();
-			/*
-			if (_pinInterrupt!=0)
-			{
-				lastAlertEchoNumber=echoNumber;
-				pinMode(_pinInterrupt,OUTPUT);		
-				digitalWrite(_pinInterrupt,1);
-				delay(1);
-				digitalWrite(_pinInterrupt,0);
-			}
-			*/
-	//		digitalWrite(_pinInterrupt,1);
 		}
 	}
 	else                  // monitor mode
