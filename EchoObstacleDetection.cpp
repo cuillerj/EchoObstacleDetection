@@ -513,10 +513,9 @@ void CheckAlert(uint8_t echoNumber)
 			int summEcho=0;
 			for (uint8_t i=0;i<4;i++)
 			{
-				if( bitRead(actionArray[pseudoEcho],i))				
+				if( bitRead(actionArray[pseudoEcho],i) && lastEchoMicro[i]!=0)				
 				{
 					summEcho=summEcho+lastEchoMicro[i]/echoCm;
-
 				}
 #if defined(debugOn)
 					Serial.print("> ");
